@@ -21,7 +21,7 @@ router.get('/navigation', getNavigationPages);
 router.get('/:page', getContentByPage);
 
 // --- Admin Routes ---
-router.use(protect, authorize('Admin', 'Executive Director'));
+router.use(protect, authorize('admin', 'executive director'));
 
 // @route   GET /api/content
 // @desc    Get all website content

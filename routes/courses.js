@@ -14,7 +14,7 @@ router.get('/', getAllCourses);
 router.get('/:id', getCourseById);
 
 // Admin routes
-router.use(protect, authorize('Admin', 'Executive Director'));
+router.use(protect, authorize('admin', 'executive director'));
 
 router.post('/', createCourse);
 router.put('/:id', updateCourse);

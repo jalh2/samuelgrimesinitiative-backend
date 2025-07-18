@@ -7,6 +7,23 @@ exports.getMe = async (req, res) => {
     res.status(200).json(req.user);
 };
 
+// @desc    Get all instructors (staff who can teach courses)
+// @route   GET /api/users/instructors
+// @access  Private/Admin/Director
+exports.getInstructors = async (req, res) => {
+    try {
+        // Find users who are staff (teachers, counselors, etc.)
+        const instructors = await User.find({
+            role: { $in: ['staff', 'mental health counselor', 'executive director'] }
+        }).populate('staffInfo');
+        
+        res.status(200).json(instructors);
+    } catch (error) {
+        console.error('Error fetching instructors:', error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
 // @desc    Get all users
 // @route   GET /api/users
 // @access  Private/Admin

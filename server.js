@@ -48,11 +48,12 @@ app.use('/api/client-attendance', require('./routes/clientAttendance'));
 app.use('/api/daily-progress-reports', require('./routes/dailyProgressReports'));
 app.use('/api/group-progress-reports', require('./routes/groupProgressReports'));
 app.use('/api/dashboard', require('./routes/dashboard'));
+app.use('/api/client-assessments', require('./routes/clientAssessments'));
 
 app.get('/', (req, res) => res.send('API Running'));
 
 // Start server
-const PORT = process.env.PORT || 5000;
+const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

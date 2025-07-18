@@ -6,6 +6,7 @@ const {
     getPatientById,
     updatePatient,
     deletePatient,
+    searchPatients,
     getActivePatientCount,
     getNewEnrollments,
     getSessionsCount,
@@ -19,6 +20,8 @@ router.use(protect, authorize('admin', 'executive director', 'mental health coun
 router.route('/')
     .post(createPatient)
     .get(getAllPatients);
+
+router.get('/search', searchPatients);
 
 router.get('/stats/active-count', getActivePatientCount);
 router.get('/stats/new-enrollments', getNewEnrollments);

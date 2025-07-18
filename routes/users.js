@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
     getMe,
+    getInstructors,
     adminTest,
     getUsers,
     getUserById,
@@ -15,6 +16,9 @@ const { protect, authorize } = require('../middleware/authMiddleware');
 router.use(protect);
 
 router.route('/me').get(getMe);
+
+// Route to get instructors (accessible by admin and directors)
+router.route('/instructors').get(authorize('admin', 'executive director'), getInstructors);
 
 // Admin-only routes
 router.use(authorize('admin', 'executive director'));

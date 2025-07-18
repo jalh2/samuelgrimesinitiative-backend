@@ -26,7 +26,7 @@ exports.uploadMaterial = async (req, res) => {
             course: courseId,
             type,
             content,
-            uploadedBy: req.user._id
+            uploadedBy: req.user.id
         });
 
         const savedMaterial = await newMaterial.save();

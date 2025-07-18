@@ -184,6 +184,30 @@ exports.getSessionsCount = async (req, res) => {
 // @desc    Get count of progress reports due
 // @route   GET /api/patients/stats/reports-due
 // @access  Private/Admin/Counselor
+exports.searchPatients = async (req, res) => {
+    const { q } = req.query;
+
+    if (!q) {
+        return res.status(400).json({ message: 'Search query is required.' });
+    }
+
+    try {
+        const queryRegex = new RegExp(q, 'i'); // Case-insensitive regex
+
+        const patients = await Patient.find({
+            $or: [
+                { 'clientPersonalInformation.firstName': queryRegex },
+                { 'clientPersonalInformation.lastName': queryRegex },
+                { 'patientId': queryRegex }
+            ]
+        }).limit(20); // Limit results for performance
+
+        res.status(200).json({ success: true, data: patients });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
 exports.getProgressReportsDue = async (req, res) => {
     try {
         const query = { status: { $in: ['Pending', 'Overdue'] } };
