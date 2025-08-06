@@ -50,6 +50,8 @@ app.use('/api/daily-progress-reports', require('./routes/dailyProgressReports'))
 app.use('/api/group-progress-reports', require('./routes/groupProgressReports'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/client-assessments', require('./routes/clientAssessments'));
+app.use('/api/events', require('./routes/eventRoutes'));
+app.use('/api/volunteers', require('./routes/volunteerRoutes'));
 
 app.get('/', (req, res) => res.send('API Running'));
 

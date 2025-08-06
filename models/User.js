@@ -49,6 +49,13 @@ const userSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
+    },
+    course: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course',
+        required: function() {
+            return this.role === 'student';
+        }
     }
 }, { timestamps: true });
 

@@ -66,6 +66,7 @@ exports.login = async (req, res) => {
                 _id: user._id,
                 email: user.email,
                 role: user.role.toLowerCase(),
+                course: user.course,
                 token: generateToken(user._id.toString(), user.role.toLowerCase()),
             });
         } else {

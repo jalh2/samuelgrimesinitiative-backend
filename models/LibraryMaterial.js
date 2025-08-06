@@ -22,6 +22,12 @@ const libraryMaterialSchema = new mongoose.Schema({
         type: String, // Can be a Base64 string, URL, or plain text
         required: true
     },
+    originalFileName: {
+        type: String
+    },
+    mimeType: {
+        type: String
+    },
     uploadedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

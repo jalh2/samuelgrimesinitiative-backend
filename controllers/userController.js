@@ -66,7 +66,7 @@ exports.createUser = async (req, res) => {
         return res.status(403).json({ success: false, message: 'You do not have permission to perform this action.' });
     }
 
-    const { email, password, role, staffInfo } = req.body;
+    const { email, password, role, staffInfo, course } = req.body;
 
     try {
         const userExists = await User.findOne({ email });
@@ -87,6 +87,14 @@ exports.createUser = async (req, res) => {
                 return res.status(400).json({ success: false, message: 'Staff information is required for this role.' });
             }
             userData.staffInfo = staffInfo;
+        }
+
+        // If the role is student, course is required
+        if (role === 'student') {
+            if (!course) {
+                return res.status(400).json({ success: false, message: 'Course is required for students.' });
+            }
+            userData.course = course;
         }
 
         const user = new User(userData);
@@ -117,18 +125,52 @@ exports.createUser = async (req, res) => {
 // @route   PUT /api/users/:id
 // @access  Private/Admin
 exports.updateUser = async (req, res) => {
-    const user = await User.findById(req.params.id);
+    console.log('--- Update User Request Received ---');
+    console.log('Request Body:', req.body);
+    try {
+        const user = await User.findById(req.params.id);
 
-    if (user) {
-        user.email = req.body.email || user.email;
-        user.role = req.body.role || user.role;
-        user.staffInfo = req.body.staffInfo || user.staffInfo;
-        // Note: Password updates should be handled separately for security.
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
 
-        const updatedUser = await user.save();
+        const { email, role, staffInfo, course } = req.body;
+
+        // Update basic fields
+        if (email) user.email = email;
+        if (role) user.role = role;
+
+        // Determine the role to be used for logic
+        const newRole = role || user.role;
+
+        // Handle role-specific fields
+        if (newRole === 'student') {
+            if (course) {
+                user.course = course;
+            } else if (role === 'student') {
+                return res.status(400).json({ message: 'Course is required for students.' });
+            }
+            user.staffInfo = undefined;
+        } else if (['staff', 'mental health counselor', 'financial controller', 'executive director'].includes(newRole)) {
+            if (staffInfo) {
+                user.staffInfo = { ...user.staffInfo, ...staffInfo };
+            } else if (role) {
+                return res.status(400).json({ message: 'Staff information is required for this role.' });
+            }
+            user.course = undefined;
+        } else {
+            user.course = undefined;
+            user.staffInfo = undefined;
+        }
+
+        console.log('User object before saving:', user);
+        const savedUser = await user.save();
+        const updatedUser = await User.findById(savedUser._id).populate('course').populate('staffInfo');
+        console.log('Final populated user sent to frontend:', updatedUser);
         res.status(200).json(updatedUser);
-    } else {
-        res.status(404).json({ message: 'User not found' });
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).json({ message: 'Server Error' });
     }
 };
 
