@@ -7,14 +7,11 @@ const {
     updateDonation,
     deleteDonation
 } = require('../controllers/donationController');
-const { protect, authorize } = require('../middleware/authMiddleware');
-
-// All routes are protected and restricted to financial staff
-router.use(protect, authorize('Admin', 'Executive Director', 'Financial Controller'));
+// const { authorize } = require('../middleware/authMiddleware');
 
 router.route('/')
-    .get(getAllDonations)
-    .post(createDonation);
+    .post(createDonation) 
+    .get(getAllDonations);
 
 router.route('/:id')
     .get(getDonationById)
