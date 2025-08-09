@@ -10,11 +10,15 @@ const {
     getActivePatientCount,
     getNewEnrollments,
     getSessionsCount,
-    getProgressReportsDue
+    getProgressReportsDue,
+    getMyProfile
 } = require('../controllers/patientController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
-// Protect all routes and authorize specific roles
+// Patient self profile endpoint (allow patients to access their own profile)
+router.get('/me', protect, authorize('patient', 'admin', 'executive director', 'mental health counselor'), getMyProfile);
+
+// Protect all remaining routes and authorize specific roles
 router.use(protect, authorize('admin', 'executive director', 'mental health counselor'));
 
 router.route('/')

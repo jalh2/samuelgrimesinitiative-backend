@@ -1,4 +1,5 @@
 const DailyProgressReport = require('../models/DailyProgressReport');
+const Patient = require('../models/Patient');
 
 // @desc    Get all daily progress reports
 // @route   GET /api/daily-progress-reports
@@ -7,10 +8,32 @@ exports.getAllDailyProgressReports = async (req, res) => {
     try {
         const reports = await DailyProgressReport.find({})
             .populate('patientId', 'clientPersonalInformation.firstName clientPersonalInformation.lastName')
-            .populate('counselorId', 'staffInfo.fullName');
+            .populate('staffId', 'staffInfo.fullName');
         res.status(200).json(reports);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Get daily progress reports for the logged-in patient
+// @route   GET /api/daily-progress-reports/me
+// @access  Private/Patient (and staff/admin allowed)
+exports.getMyReports = async (req, res) => {
+    try {
+        const userId = req?.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: 'Not authorized: missing user context' });
+        }
+        const patient = await Patient.findOne({ userId });
+        if (!patient) {
+            return res.status(404).json({ message: 'Patient profile not found' });
+        }
+        const reports = await DailyProgressReport.find({ patientId: patient._id })
+            .populate('staffId', 'staffInfo.fullName')
+            .sort({ date: -1 });
+        return res.status(200).json(reports);
+    } catch (error) {
+        return res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
 
@@ -20,7 +43,7 @@ exports.getAllDailyProgressReports = async (req, res) => {
 exports.getReportsForPatient = async (req, res) => {
     try {
         const reports = await DailyProgressReport.find({ patientId: req.params.patientId })
-            .populate('counselorId', 'staffInfo.fullName')
+            .populate('staffId', 'staffInfo.fullName')
             .sort({ date: -1 });
         res.status(200).json(reports);
     } catch (error) {
@@ -35,7 +58,7 @@ exports.getDailyProgressReportById = async (req, res) => {
     try {
         const report = await DailyProgressReport.findById(req.params.id)
             .populate('patientId', 'clientPersonalInformation.firstName clientPersonalInformation.lastName')
-            .populate('counselorId', 'staffInfo.fullName');
+            .populate('staffId', 'staffInfo.fullName');
         if (!report) {
             return res.status(404).json({ message: 'Report not found' });
         }
@@ -49,15 +72,24 @@ exports.getDailyProgressReportById = async (req, res) => {
 // @route   POST /api/daily-progress-reports
 // @access  Private/Authorized Staff
 exports.createDailyProgressReport = async (req, res) => {
-    const { patientId, date, status, summary, plan } = req.body;
+    const { patientId, date, status, clientSituation, actionTaken, staffSignature, clientSignature } = req.body;
     try {
+        // Basic validation aligned with model
+        if (!patientId || !date) {
+            return res.status(400).json({ message: 'patientId and date are required' });
+        }
+        if (!clientSituation || !actionTaken) {
+            return res.status(400).json({ message: 'clientSituation and actionTaken are required' });
+        }
         const newReport = new DailyProgressReport({
             patientId,
-            counselorId: req.user._id,
+            staffId: req.user.id,
             date,
-            status,
-            summary,
-            plan
+            status: status || undefined,
+            clientSituation,
+            actionTaken,
+            staffSignature,
+            clientSignature
         });
         const savedReport = await newReport.save();
         res.status(201).json(savedReport);

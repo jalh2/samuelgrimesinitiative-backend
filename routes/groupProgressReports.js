@@ -10,7 +10,7 @@ const {
 const { protect, authorize } = require('../middleware/authMiddleware');
 
 // All routes are protected and restricted to authorized staff
-router.use(protect, authorize('Admin', 'Executive Director', 'Mental Health Counselor'));
+router.use(protect, authorize('admin', 'executive director', 'mental health counselor'));
 
 router.route('/')
     .get(getAllGroupProgressReports)

@@ -5,9 +5,27 @@ const GroupProgressReport = require('../models/GroupProgressReport');
 // @access  Private/Authorized Staff
 exports.getAllGroupProgressReports = async (req, res) => {
     try {
-        const reports = await GroupProgressReport.find({})
-            .populate('patientIds', 'clientPersonalInformation.firstName clientPersonalInformation.lastName')
-            .populate('counselorId', 'staffInfo.fullName');
+        const { q } = req.query;
+        const filter = {};
+
+        if (q && typeof q === 'string' && q.trim()) {
+            const regex = new RegExp(q.trim(), 'i');
+            filter.$or = [
+                { groupName: regex },
+                { topic: regex },
+                { objective: regex },
+                { process: regex },
+                { materialsUsed: regex },
+                { groupDynamics: regex },
+                { evaluation: regex },
+                { recommendation: regex },
+            ];
+        }
+
+        const reports = await GroupProgressReport.find(filter)
+            .sort({ createdAt: -1 })
+            .populate('participants', 'clientPersonalInformation.firstName clientPersonalInformation.lastName')
+            .populate('facilitator', 'staffInfo.fullName email');
         res.status(200).json(reports);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -20,8 +38,8 @@ exports.getAllGroupProgressReports = async (req, res) => {
 exports.getGroupProgressReportById = async (req, res) => {
     try {
         const report = await GroupProgressReport.findById(req.params.id)
-            .populate('patientIds', 'clientPersonalInformation.firstName clientPersonalInformation.lastName')
-            .populate('counselorId', 'staffInfo.fullName');
+            .populate('participants', 'clientPersonalInformation.firstName clientPersonalInformation.lastName')
+            .populate('facilitator', 'staffInfo.fullName email');
         if (!report) {
             return res.status(404).json({ message: 'Report not found' });
         }
@@ -35,17 +53,24 @@ exports.getGroupProgressReportById = async (req, res) => {
 // @route   POST /api/group-progress-reports
 // @access  Private/Authorized Staff
 exports.createGroupProgressReport = async (req, res) => {
-    const { groupName, date, patientIds, topicsCovered, groupProcess, summary, plan } = req.body;
+    const { groupName, date, topic, process, groupDynamics, evaluation, recommendation, participants = [] } = req.body;
     try {
+        if (!groupName || !date) {
+            return res.status(400).json({ message: 'groupName and date are required' });
+        }
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ message: 'Not authorized: user context missing' });
+        }
         const newReport = new GroupProgressReport({
             groupName,
             date,
-            counselorId: req.user._id,
-            patientIds,
-            topicsCovered,
-            groupProcess,
-            summary,
-            plan
+            facilitator: req.user.id,
+            topic,
+            process,
+            groupDynamics,
+            evaluation,
+            recommendation,
+            participants
         });
         const savedReport = await newReport.save();
         res.status(201).json(savedReport);

@@ -6,11 +6,15 @@ const {
     createDailyProgressReport,
     updateDailyProgressReport,
     deleteDailyProgressReport,
-    getReportsForPatient
+    getReportsForPatient,
+    getMyReports
 } = require('../controllers/dailyProgressReportController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
-// All routes are protected and restricted to authorized staff
+// Patient self reports route (allow patients to access their own reports)
+router.get('/me', protect, authorize('Patient', 'Admin', 'Executive Director', 'Mental Health Counselor'), getMyReports);
+
+// All remaining routes are protected and restricted to authorized staff
 router.use(protect, authorize('Admin', 'Executive Director', 'Mental Health Counselor'));
 
 router.route('/')

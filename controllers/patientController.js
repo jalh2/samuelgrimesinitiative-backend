@@ -14,6 +14,16 @@ exports.createPatient = async (req, res) => {
         return res.status(400).json({ message: 'Email is required to create a user account for the patient.' });
     }
 
+    // Basic validation for client name fields to avoid email being used as name
+    const fn = clientPersonalInformation?.firstName?.trim();
+    const ln = clientPersonalInformation?.lastName?.trim();
+    const looksLikeEmail = (v) => /@/.test(v || '');
+    if (!fn || !ln || looksLikeEmail(fn) || looksLikeEmail(ln)) {
+        return res.status(400).json({
+            message: 'Valid first and last name are required for the patient.',
+        });
+    }
+
     try {
         // Check if a user with this email already exists
         const userExists = await User.findOne({ email });
@@ -27,7 +37,7 @@ exports.createPatient = async (req, res) => {
         // Create a new user for the patient
         const user = new User({
             email,
-            role: 'Patient',
+            role: 'patient',
         });
         user.setPassword(generatedPassword);
         const savedUser = await user.save();
@@ -218,5 +228,24 @@ exports.getProgressReportsDue = async (req, res) => {
         res.status(200).json({ count: dailyReportsCount + groupReportsCount });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Get the logged-in patient's profile
+// @route   GET /api/patients/me
+// @access  Private/Patient (and staff/admin for debugging)
+exports.getMyProfile = async (req, res) => {
+    try {
+        const userId = req?.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: 'Not authorized: missing user context' });
+        }
+        const patient = await Patient.findOne({ userId }).populate('userId', 'email isActive');
+        if (!patient) {
+            return res.status(404).json({ message: 'Patient profile not found' });
+        }
+        return res.status(200).json(patient);
+    } catch (error) {
+        return res.status(500).json({ message: 'Server error', error: error.message });
     }
 };

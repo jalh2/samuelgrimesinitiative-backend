@@ -5,11 +5,15 @@ const {
     getClientAttendanceReportById,
     createClientAttendanceReport,
     updateClientAttendanceReport,
-    deleteClientAttendanceReport
+    deleteClientAttendanceReport,
+    getMyClientAttendance
 } = require('../controllers/clientAttendanceController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
-// All routes are protected and restricted to authorized staff
+// Patient self attendance route (allow patients to access their own weekly records)
+router.get('/me', protect, authorize('Patient', 'Admin', 'Executive Director', 'Mental Health Counselor'), getMyClientAttendance);
+
+// All remaining routes are protected and restricted to authorized staff
 router.use(protect, authorize('Admin', 'Executive Director', 'Mental Health Counselor'));
 
 router.route('/')

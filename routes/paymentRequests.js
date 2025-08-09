@@ -15,15 +15,15 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 // All routes are protected and restricted to financial staff
-router.use(protect, authorize('Admin', 'Executive Director', 'Financial Controller'));
+//router.use(protect, authorize('Admin', 'Executive Director', 'Financial Controller'));
 
 router.route('/')
     .get(getAllPaymentRequests)
-    .post(upload.single('receiptImage'), createPaymentRequest);
+    .post(createPaymentRequest);
 
 router.route('/:id')
     .get(getPaymentRequestById)
-    .put(upload.single('receiptImage'), updatePaymentRequest)
+    .put(updatePaymentRequest)
     .delete(deletePaymentRequest);
 
 module.exports = router;
