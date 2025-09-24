@@ -34,7 +34,7 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['student', 'patient', 'staff', 'mental health counselor', 'financial controller', 'executive director', 'admin'],
+        enum: ['student', 'patient', 'staff', 'nurse', 'mental health counselor', 'financial controller', 'executive director', 'admin'],
         default: 'student'
     },
     hash: String,
@@ -43,7 +43,7 @@ const userSchema = new mongoose.Schema({
         type: staffInfoSchema,
         // Only include staffInfo if the role is one of the staff types
         required: function() {
-            return ['staff', 'mental health counselor', 'financial controller', 'executive director'].includes(this.role);
+            return ['staff', 'nurse', 'mental health counselor', 'financial controller', 'executive director'].includes(this.role);
         }
     },
     isActive: {

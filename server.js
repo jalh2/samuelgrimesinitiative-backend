@@ -52,6 +52,11 @@ app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/client-assessments', require('./routes/clientAssessments'));
 app.use('/api/events', require('./routes/eventRoutes'));
 app.use('/api/volunteers', require('./routes/volunteerRoutes'));
+// New form routes
+app.use('/api/weekly-check-ins', require('./routes/weeklyCheckIns'));
+app.use('/api/self-assessments', require('./routes/selfAssessments'));
+app.use('/api/progress-trackers', require('./routes/progressTrackers'));
+app.use('/api/final-evaluations', require('./routes/finalEvaluations'));
 
 app.get('/', (req, res) => res.send('API Running'));
 

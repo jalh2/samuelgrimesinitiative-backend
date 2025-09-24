@@ -14,7 +14,7 @@ exports.getInstructors = async (req, res) => {
     try {
         // Find users who are staff (teachers, counselors, etc.)
         const instructors = await User.find({
-            role: { $in: ['staff', 'mental health counselor', 'executive director'] }
+            role: { $in: ['staff', 'nurse', 'mental health counselor', 'executive director'] }
         }).populate('staffInfo');
         
         res.status(200).json(instructors);
@@ -82,7 +82,7 @@ exports.createUser = async (req, res) => {
         };
 
         // Include staffInfo only if the role requires it
-        if (['staff', 'mental health counselor', 'financial controller', 'executive director'].includes(role)) {
+        if (['staff', 'nurse', 'mental health counselor', 'financial controller', 'executive director'].includes(role)) {
             if (!staffInfo) {
                 return res.status(400).json({ success: false, message: 'Staff information is required for this role.' });
             }
@@ -151,7 +151,7 @@ exports.updateUser = async (req, res) => {
                 return res.status(400).json({ message: 'Course is required for students.' });
             }
             user.staffInfo = undefined;
-        } else if (['staff', 'mental health counselor', 'financial controller', 'executive director'].includes(newRole)) {
+        } else if (['staff', 'nurse', 'mental health counselor', 'financial controller', 'executive director'].includes(newRole)) {
             if (staffInfo) {
                 user.staffInfo = { ...user.staffInfo, ...staffInfo };
             } else if (role) {
