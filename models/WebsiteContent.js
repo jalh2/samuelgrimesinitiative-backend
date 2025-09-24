@@ -4,7 +4,7 @@ const websiteContentSchema = new mongoose.Schema({
     page: {
         type: String,
         required: true,
-        enum: ['home', 'about', 'team', 'programs', 'donations', 'gallery', 'contact']
+        enum: ['home', 'about', 'team', 'programs', 'donations', 'gallery', 'contact', 'footer']
     },
     section: {
         type: String,
