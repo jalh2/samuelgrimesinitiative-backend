@@ -50,6 +50,11 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    // Base64-encoded image data URL (e.g., "data:image/png;base64,....")
+    profileImage: {
+        type: String,
+        default: ''
+    },
     course: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Course',
@@ -72,3 +77,4 @@ userSchema.methods.validPassword = function(password) {
 };
 
 module.exports = mongoose.model('User', userSchema);
+

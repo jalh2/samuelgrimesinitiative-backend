@@ -66,7 +66,7 @@ exports.createUser = async (req, res) => {
         return res.status(403).json({ success: false, message: 'You do not have permission to perform this action.' });
     }
 
-    const { email, password, role, staffInfo, course } = req.body;
+    const { email, password, role, staffInfo, course, profileImage } = req.body;
 
     try {
         const userExists = await User.findOne({ email });
@@ -95,6 +95,11 @@ exports.createUser = async (req, res) => {
                 return res.status(400).json({ success: false, message: 'Course is required for students.' });
             }
             userData.course = course;
+        }
+
+        // Add profile image if provided (base64 data URL)
+        if (typeof profileImage !== 'undefined') {
+            userData.profileImage = profileImage;
         }
 
         const user = new User(userData);
@@ -134,7 +139,7 @@ exports.updateUser = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const { email, role, staffInfo, course } = req.body;
+        const { email, role, staffInfo, course, profileImage } = req.body;
 
         // Update basic fields
         if (email) user.email = email;
@@ -161,6 +166,11 @@ exports.updateUser = async (req, res) => {
         } else {
             user.course = undefined;
             user.staffInfo = undefined;
+        }
+
+        // Update profile image if provided (allow clearing when empty string)
+        if (typeof profileImage !== 'undefined') {
+            user.profileImage = profileImage;
         }
 
         console.log('User object before saving:', user);

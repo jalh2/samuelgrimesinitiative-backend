@@ -15,8 +15,10 @@ app.use(cors({
     allowedHeaders: ['*'],
     credentials: true
 }));
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+// Configurable body size limit (defaults to 100mb)
+const BODY_LIMIT = process.env.BODY_LIMIT || '100mb';
+app.use(express.json({ limit: BODY_LIMIT }));
+app.use(express.urlencoded({ limit: BODY_LIMIT, extended: true }));
 
 
 
